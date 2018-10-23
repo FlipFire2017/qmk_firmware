@@ -168,7 +168,8 @@ void keyboard_init(void) {
 #endif
 #ifdef BOOTMAGIC_ENABLE
     bootmagic();
-#else
+#endif
+#ifdef MAGIC_ENABLE
     magic();
 #endif
 #ifdef BACKLIGHT_ENABLE

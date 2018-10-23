@@ -23,6 +23,7 @@
  extern "C" {
 #endif
 
+#include "stm32f3xx.h"
 #include "ch.h"
 #include "hal.h"
 

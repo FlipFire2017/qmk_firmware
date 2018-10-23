@@ -56,7 +56,9 @@ endif
 ifeq ($(strip $(BOOTMAGIC_ENABLE)), yes)
     TMK_COMMON_DEFS += -DBOOTMAGIC_ENABLE
     TMK_COMMON_SRC += $(COMMON_DIR)/bootmagic.c
-else
+endif
+
+ifeq ($(strip $(MAGIC_ENABLE)),yes)
     TMK_COMMON_DEFS += -DMAGIC_ENABLE
     TMK_COMMON_SRC += $(COMMON_DIR)/magic.c
 endif

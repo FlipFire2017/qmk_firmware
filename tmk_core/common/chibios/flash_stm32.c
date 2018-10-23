@@ -16,9 +16,7 @@
  * Modifications for QMK and STM32F303 by Yiancar
  */
 
-#define STM32F303xC
 
-#include "stm32f3xx.h"
 #include "flash_stm32.h"
 
 #define FLASH_KEY1          ((uint32_t)0x45670123)

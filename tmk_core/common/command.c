@@ -355,6 +355,7 @@ static bool command_common(uint8_t code)
 
 		// activate console
         case MAGIC_KC(MAGIC_KEY_CONSOLE):
+	    dprintf("Disable debug.\n");
             debug_matrix   = false;
             debug_keyboard = false;
             debug_mouse    = false;

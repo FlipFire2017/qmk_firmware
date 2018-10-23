@@ -16,7 +16,7 @@
 
 #include "keycode_config.h"
 
-extern keymap_config_t keymap_config;
+keymap_config_t keymap_config;
 
 uint16_t keycode_config(uint16_t keycode) {
 
