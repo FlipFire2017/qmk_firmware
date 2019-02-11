@@ -21,6 +21,14 @@
 #define TIMER_INTERRUPT_VECTOR STM32_TIM14_HANDLER
 #define RESET_COUNTER STM32_TIM14->SR &= ~STM32_TIM_SR_UIF
 
+#elif defined(STM32)
+#ifndef TIMER_INTERRUPT_VECTOR 
+#error "Your platform not support sleep_led by default. You should define your own TIMER_INTERRUPT_VECTOR"
+#endif //TIMER_INTERRUPT_VECTOR
+
+#ifndef RESET_COUNTER
+#error #error "Your platform not support sleep_led by default. You should define your own RESET_COUNTER"
+#endif
 #endif
 
 #if defined(KL2x) || defined(K20x) || defined(STM32F0XX) /* common parts for timers/interrupts */
@@ -208,17 +216,21 @@ void sleep_led_toggle(void) {
 
 #else /* platform selection: not on familiar chips */
 
+__attribute__((weak))
 void sleep_led_init(void) {
 }
  
+__attribute__((weak)) 
 void sleep_led_enable(void) {
     led_set(1<<USB_LED_CAPS_LOCK);
 }
  
+ __attribute__((weak))
 void sleep_led_disable(void) {
     led_set(0);
 }
  
+__attribute__((weak))
 void sleep_led_toggle(void) {
     // not implemented
 }
