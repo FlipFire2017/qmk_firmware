@@ -61,7 +61,7 @@ host_driver_t serial_driver = {
 #endif
 
 static SerialConfig config = {
-    .sc_speed = SERIAL_LINK_BAUD
+    .speed = SERIAL_LINK_BAUD
 };
 
 //#define DEBUG_LINK_ERRORS
