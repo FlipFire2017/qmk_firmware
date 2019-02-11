@@ -18,6 +18,9 @@
 
 #include "quantum.h"
 
+#define TIMER_INTERRUPT_VECTOR STM32_TIM1_HANDLER
+#define RESET_COUNTER STM32_TIM1->SR &= ~STM32_TIM_SR_UIF
+
 /* This a shortcut to help you visually see your layout.
  *
  * The first section contains all of the arguments representing the physical
@@ -35,13 +38,13 @@
     A80, A70, A60, A50, A40, A30, A20,  \
     A81, A71, A61, A51, A41, A31, A21,  \
     A03, A82, A72, A62, A52, A42, A32,       \
-    A73, A23, A63, A53, A43, A33, A13, A34, \
+    A73, A63, A53, A43, A33, A23, A13, A34, \
     A24, A14, A04, A83, A64, A54, A44,           \
                                             \
          B20, B30, B40, B50, B60, B70, B80, \
          B21, B31, B41, B51, B61, B71, B81, \
          B32, B42, B52, B62, B72, B82, B03, \
-    B34, B13, B33, B43, B53, B63, B23, B73, \
+    B34, B13, B23, B33, B43, B53, B63, B73, \
          B44, B54, B64, B83, B04, B14, B24 \
 ) { \
     { KC_NO, KC_NO, KC_NO, A03,   A04 }, \
@@ -63,5 +66,28 @@
     { B70,   B71,   B72,   B73,   KC_NO }, \
     { B80,   B81,   B82,   B83,   KC_NO }  \
 }
+
+#define COL1 PAL_LINE(GPIOB, 0)
+#define COL2 PAL_LINE(GPIOB, 1)
+#define COL3 PAL_LINE(GPIOB, 2)
+#define COL4 PAL_LINE(GPIOB, 3)
+#define COL5 PAL_LINE(GPIOB, 4)
+
+
+#define ROW1 PAL_LINE(GPIOA, 0)
+#define ROW2 PAL_LINE(GPIOA, 1)
+#define ROW3 PAL_LINE(GPIOA, 4)
+#define ROW4 PAL_LINE(GPIOA, 5)
+#define ROW5 PAL_LINE(GPIOA, 6)
+#define ROW6 PAL_LINE(GPIOA, 7)
+#define ROW7 PAL_LINE(GPIOB, 5)
+#define ROW8 PAL_LINE(GPIOB, 8)
+#define ROW9 PAL_LINE(GPIOB, 9)
+
+#define LEDR PAL_LINE(GPIOA, 8)
+#define LEDG PAL_LINE(GPIOA, 9)
+#define LEDB PAL_LINE(GPIOA,10)
+
+#define LR_DETECT_PIN PAL_LINE(GPIOC,13)
 
 #endif

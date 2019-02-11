@@ -15,17 +15,55 @@
  */
 #include "project_coder.h"
 #include "serial_link/system/serial_link.h"
+#include "color.h"
+
+static HSV hsv = {
+	0,1.0,1.0
+};
+
+static uint16_t slow_down_ct = 0;
+#define PRESCALER 100;
+
+static void colorTick(PWMDriver *pwmp){
+	(void)pwmp;
+	static RGB rgb;
+	slow_down_ct = (slow_down_ct +1 ) % PRESCALER;
+	if(slow_down_ct == 0){
+		hsv.h = (hsv.h + 1) % 360;
+		rgb = hsv_to_rgb(hsv);
+		// dprintf("[HSV] (%d,%.2f,%.2f)",hsv.h,hsv.s,hsv.v);
+		// dprintf("[RGB] (%.2f,%.2f,%.2f)",rgb.r,rgb.g,rgb.b);
+		pwmEnableChannel(&PWMD1, 0, PWM_PERCENTAGE_TO_WIDTH(&PWMD1, rgb.r * 10000  ));
+		pwmEnableChannel(&PWMD1, 1, PWM_PERCENTAGE_TO_WIDTH(&PWMD1, rgb.g * 10000  ));
+		pwmEnableChannel(&PWMD1, 2, PWM_PERCENTAGE_TO_WIDTH(&PWMD1, rgb.b * 10000  ));
+	}
+}
+
+static PWMConfig rgbPWMConfig = {
+  255000,                                    /* 10kHz PWM clock frequency.     */
+  255,                                    /* Initial PWM period 1S.         */
+  colorTick,                                     /* Period callback.               */
+  {
+   {PWM_OUTPUT_ACTIVE_LOW, NULL},          /* CH1 mode and callback.         */
+   {PWM_OUTPUT_ACTIVE_LOW, NULL},             /* CH2 mode and callback.         */
+   {PWM_OUTPUT_ACTIVE_LOW, NULL},             /* CH3 mode and callback.         */
+   {PWM_OUTPUT_DISABLED, NULL}              /* CH4 mode and callback.         */
+  },
+  0,                                        /* Control Register 2.            */
+  0                                         /* DMA/Interrupt Enable Register. */
+};
 
 void matrix_init_kb(void) {
+	
 	// put your keyboard start-up code here
 	// runs once when the firmware starts up
-	palSetPadMode(GPIOC, 14,  PAL_MODE_OUTPUT_PUSHPULL);
-	palSetPadMode(GPIOC, 15,  PAL_MODE_OUTPUT_PUSHPULL);
-	palSetPadMode(GPIOA, 15,  PAL_MODE_OUTPUT_PUSHPULL);
-	palSetPad(GPIOA,15);
-	palSetPad(GPIOC,14);
-	palSetPad(GPIOC,15);
-
+  // leds init
+	// palSetLineMode(LEDR,  PAL_MODE_OUTPUT_PUSHPULL);
+	// palSetLineMode(LEDG,  PAL_MODE_OUTPUT_PUSHPULL);
+	// palSetLineMode(LEDB,  PAL_MODE_OUTPUT_PUSHPULL);
+	// palClearLine(LEDR);
+	// palClearLine(LEDG);
+	// palClearLine(LEDB);
 	matrix_init_user();
 }
 
@@ -59,9 +97,28 @@ void init_serial_link_hal(void){
 	**/
 	palSetPadMode(GPIOB,6,PAL_MODE_ALTERNATE(7));
 	palSetPadMode(GPIOB,7,PAL_MODE_ALTERNATE(7));
+	/**
+	 * Test
+	 **/
+	palSetLineMode(LEDR,PAL_MODE_OUTPUT_PUSHPULL);
+	palSetLineMode(LEDG,PAL_MODE_OUTPUT_PUSHPULL);
+	palSetLineMode(LEDB,PAL_MODE_OUTPUT_PUSHPULL);
+	palClearLine(LEDB);
+	palSetLine(LEDR);
+	palSetLine(LEDG);
 
 }
 
 bool is_keyboard_master(void) {
     return is_serial_link_master();
+}
+
+void backlight_init_ports(void){
+	palSetLine(LEDB);
+	palSetLineMode(LEDR,PAL_MODE_ALTERNATE(6));
+	palSetLineMode(LEDG,PAL_MODE_ALTERNATE(6));
+	palSetLineMode(LEDB,PAL_MODE_ALTERNATE(6));
+	
+	pwmStart(&PWMD1,&rgbPWMConfig);
+	pwmEnablePeriodicNotification(&PWMD1);
 }

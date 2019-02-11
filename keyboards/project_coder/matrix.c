@@ -25,21 +25,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 #include "matrix.h"
 #include "serial_link/system/serial_link.h"
+#include "project_coder.h"
 
 
-/*
- * Infinity ErgoDox Pinusage:
- * Column pins are input with internal pull-down. Row pins are output and strobe with high.
- * Key is high or 1 when it turns on.
- *
- *     col: { PTD1, PTD4, PTD5, PTD6, PTD7 }
- *     row: { PTB2, PTB3, PTB18, PTB19, PTC0, PTC9, PTC10, PTC11, PTD0 }
- */
-/* matrix state(1:on, 0:off) */
+
+
+
+
+
 static matrix_row_t matrix[MATRIX_ROWS];
 static matrix_row_t matrix_debouncing[LOCAL_MATRIX_ROWS];
 static bool debouncing = false;
 static uint16_t debouncing_time = 0;
+
+static uint8_t is_left_hand = 0;
 
 
 void matrix_init(void)
@@ -48,22 +47,26 @@ void matrix_init(void)
     debug_keyboard = true;
     debug_matrix = true;
     /* Column(sense) */
-    palSetPadMode(GPIOB, 0,  PAL_MODE_INPUT_PULLDOWN);
-    palSetPadMode(GPIOB, 1,  PAL_MODE_INPUT_PULLDOWN);
-    palSetPadMode(GPIOB, 2,  PAL_MODE_INPUT_PULLDOWN);
-    palSetPadMode(GPIOB, 3,  PAL_MODE_INPUT_PULLDOWN);
-    palSetPadMode(GPIOB, 4,  PAL_MODE_INPUT_PULLDOWN);
+    palSetLineMode(COL1,  PAL_MODE_INPUT_PULLDOWN);
+    palSetLineMode(COL2,  PAL_MODE_INPUT_PULLDOWN);
+    palSetLineMode(COL3,  PAL_MODE_INPUT_PULLDOWN);
+    palSetLineMode(COL4,  PAL_MODE_INPUT_PULLDOWN);
+    palSetLineMode(COL5,  PAL_MODE_INPUT_PULLDOWN);
 
     /* Row(strobe) */
-    palSetPadMode(GPIOA, 0,  PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 1,  PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 4, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 5, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 6,  PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 7,  PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 8, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 9, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOA, 10,  PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW1,  PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW2,  PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW3, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW4, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW5,  PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW6,  PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW7, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW8, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetLineMode(ROW9,  PAL_MODE_OUTPUT_PUSHPULL);
+
+    palSetLineMode(LR_DETECT_PIN,PAL_MODE_INPUT_PULLDOWN);
+
+	is_left_hand = palReadLine(LR_DETECT_PIN);
 
     memset(matrix, 0, MATRIX_ROWS * sizeof(matrix_row_t));
     memset(matrix_debouncing, 0, LOCAL_MATRIX_ROWS * sizeof(matrix_row_t));
@@ -78,15 +81,15 @@ uint8_t matrix_scan(void)
 
         // strobe row
         switch (row) {
-            case 0: palSetPad(GPIOA, 0);    break;
-            case 1: palSetPad(GPIOA, 1);    break;
-            case 2: palSetPad(GPIOA, 4);   break;
-            case 3: palSetPad(GPIOA, 5);   break;
-            case 4: palSetPad(GPIOA, 6);    break;
-            case 5: palSetPad(GPIOA, 7);    break;
-            case 6: palSetPad(GPIOA, 8);   break;
-            case 7: palSetPad(GPIOA, 9);   break;
-            case 8: palSetPad(GPIOA, 10);    break;
+            case 0: palSetLine(ROW1);    break;
+            case 1: palSetLine(ROW2);    break;
+            case 2: palSetLine(ROW3);   break;
+            case 3: palSetLine(ROW4);   break;
+            case 4: palSetLine(ROW5);    break;
+            case 5: palSetLine(ROW6);    break;
+            case 6: palSetLine(ROW7);   break;
+            case 7: palSetLine(ROW8);   break;
+            case 8: palSetLine(ROW9);    break;
         }
 
         // need wait to settle pin state
@@ -98,19 +101,19 @@ uint8_t matrix_scan(void)
 
         // read col data: { PB0,1,2,3,4 }
         data = palReadPort(GPIOB) & 0x1F;
-             
+
 
         // un-strobe row
         switch (row) {
-            case 0: palClearPad(GPIOA, 0);    break;
-            case 1: palClearPad(GPIOA, 1);    break;
-            case 2: palClearPad(GPIOA, 4);   break;
-            case 3: palClearPad(GPIOA, 5);   break;
-            case 4: palClearPad(GPIOA, 6);    break;
-            case 5: palClearPad(GPIOA, 7);    break;
-            case 6: palClearPad(GPIOA, 8);   break;
-            case 7: palClearPad(GPIOA, 9);   break;
-            case 8: palClearPad(GPIOA, 10);    break;
+            case 0: palClearLine(ROW1);    break;
+            case 1: palClearLine(ROW2);    break;
+            case 2: palClearLine(ROW3);   break;
+            case 3: palClearLine(ROW4);   break;
+            case 4: palClearLine(ROW5);    break;
+            case 5: palClearLine(ROW6);    break;
+            case 6: palClearLine(ROW7);   break;
+            case 7: palClearLine(ROW8);   break;
+            case 8: palClearLine(ROW9);    break;
         }
 
         if (matrix_debouncing[row] != data) {
@@ -121,11 +124,9 @@ uint8_t matrix_scan(void)
     }
 
     uint8_t offset = 0;
-#ifdef MASTER_IS_ON_RIGHT
-    if (is_serial_link_master()) {
+    if (!is_left_hand && is_serial_link_master()) {
         offset = MATRIX_ROWS - LOCAL_MATRIX_ROWS;
     }
-#endif
 
     if (debouncing && timer_elapsed(debouncing_time) > DEBOUNCE) {
         for (int row = 0; row < LOCAL_MATRIX_ROWS; row++) {
@@ -162,11 +163,9 @@ void matrix_print(void)
 
 void matrix_set_remote(matrix_row_t* rows, uint8_t index) {
     uint8_t offset = 0;
-#ifdef MASTER_IS_ON_RIGHT
-    offset = MATRIX_ROWS - LOCAL_MATRIX_ROWS * (index + 2);
-#else
-    offset = LOCAL_MATRIX_ROWS * (index + 1);
-#endif
+    if (is_left_hand) {
+        offset = MATRIX_ROWS - LOCAL_MATRIX_ROWS;
+    }
     for (int row = 0; row < LOCAL_MATRIX_ROWS; row++) {
         matrix[offset + row] = rows[row];
     }
