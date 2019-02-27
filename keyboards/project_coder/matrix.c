@@ -43,9 +43,11 @@ static uint8_t is_left_hand = 0;
 
 void matrix_init(void)
 {
+#ifndef NO_DEBUG
     debug_enable = true;
     debug_keyboard = true;
     debug_matrix = true;
+#endif
     /* Column(sense) */
     palSetLineMode(COL1,  PAL_MODE_INPUT_PULLDOWN);
     palSetLineMode(COL2,  PAL_MODE_INPUT_PULLDOWN);
@@ -150,15 +152,17 @@ matrix_row_t matrix_get_row(uint8_t row)
 
 void matrix_print(void)
 {
+#ifndef NO_DEBUG
     dprintf("\nr/c 01234567\n");
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         dprintf("%X0: ", row);
         matrix_row_t data = matrix_get_row(row);
         for (int col = 0; col < MATRIX_COLS; col++) {
-	    dprintf("%d",(data & (1<<col))?1:0);
+	        dprintf("%d",(data & (1<<col))?1:0);
         }
         dprintf("\n");
     }
+#endif
 }
 
 void matrix_set_remote(matrix_row_t* rows, uint8_t index) {
